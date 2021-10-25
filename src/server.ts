@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Response } from 'express';
 import bodyParser from 'body-parser';
 import { filterImageFromURL, deleteLocalFiles } from './util/util';
 var fs = require('fs');
@@ -29,19 +29,19 @@ var path = require('path');
 
   /**************************************************************************** */
   app.get("/filteredimage", async (req, res) => {
-    let imageUrl = req.query.image_url;
-    let resFile;
+    const imageUrl: string = req.query.image_url;
+    let resFile: string;
     try {
       if (imageUrl) {
         console.log("Image Url : " + imageUrl);
-        resFile = await filterImageFromURL(imageUrl as string).catch(() => { console.log("Image could not be processed !") });
+        await filterImageFromURL(imageUrl).then((res) => {resFile = res;}).catch(() => { console.log("Image could not be processed !") });
         if (resFile) {
           res.sendFile(resFile);
           console.log("Image Processed Successfully !");
           res.on('finish', () => {
             var loadedImageFileNames: string[] = fs.readdirSync(__dirname + '/util/tmp/');
             loadedImageFileNames.forEach((name: string, index: number) => {
-              const filePath = path.join(__dirname, '/util/tmp/' + name);
+              const filePath: string = path.join(__dirname, '/util/tmp/' + name);
               loadedImageFileNames[index] = filePath;
             });
             console.log("Loaded Image File Names : " + loadedImageFileNames);
